@@ -1,16 +1,29 @@
-import { Anime } from "@/interfaces/anime";
-import { computed } from "vue";
+import { watch } from "vue";
+import { useTimer } from 'vue-timer-hook';
+import { useAnimeStore } from "../stores/anime";
+import { storeToRefs } from "pinia";
 
-export const useGuess = (anime:Anime) => {
-    const animeTitle = computed(() => {
-        if (!anime) return [];
-        return Array.from(anime.title).map(a => {
-            if (a.trim() !== "") return '_';
-            return a;
-        })
-    })
+export const useGuess = () => {
+
+    const time = new Date();
+    const store = useAnimeStore(),
+        { setHint } = store,
+        { animeTitle } = storeToRefs(store);
+
+    time.setSeconds(time.getSeconds() + 60); // 10 minutes timer
+    // @ts-ignore
+    const timer = useTimer(time);
+
+    watch(timer.seconds, (value) => {
+        let number = value / 5;
+        console.log(number);
+        if (Number.isInteger(number)) {
+            setHint();
+        }
+    });
 
     return {
-        animeTitle
+        animeTitle,
+        timer
     }
 }

@@ -3,8 +3,12 @@
         <img :src="item.images.jpg.large_image_url" class="card-img-top" alt="...">
         <div class="card-body">
             <h5 class="card-title anime__title">
-                {{ animeTitle.join("") }}
+                <span v-for="(item, index) in animeTitle" :key="index">
+                {{ getText(item) }}</span>
             </h5>
+            <div class="d-flex justify-content-end">
+                <Timer :timer="timer"/>
+            </div>
         </div>
         <Footer />
     </div>
@@ -16,12 +20,26 @@ import { useGuess } from '../composables/useGuess';
 
 // Components
 import Footer from './Footer.vue';
+import Timer from './Timer.vue';
+import { TextCharacter } from '../model/textCharacter';
 
 const { item } = defineProps<{
     item: Anime
 }>();
 
-const { animeTitle } = useGuess(item);
+const { animeTitle, timer } = useGuess();
+
+// in component
+const getText = (item:TextCharacter) => {
+    if (item.isBlankSpace) {
+        return " ";
+    } else if (item.hidden) {
+        return "_";
+    } else {
+        return item.text;
+    }
+}
+
 </script>
 
 <style scoped>

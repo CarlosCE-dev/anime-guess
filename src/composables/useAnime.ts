@@ -11,10 +11,10 @@ export const useAnime = () => {
     const getNextRandomAnime = async () => {
         const store = useAnimeStore();
         store.setLoader(true);
+        
         try {
             
             const { data:body } = await axios.get<AnimeResponse>('https://api.jikan.moe/v4/random/anime');
-            
             store.setAnime(body.data);
             
         } catch (error) {
