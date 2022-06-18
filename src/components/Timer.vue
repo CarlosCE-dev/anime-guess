@@ -1,15 +1,28 @@
 <template>
     <div class="ml-auto timer">
-        <span v-if="timer.minutes.value !== 0">{{ timer.minutes }}:</span>{{ timer.seconds }}
+        <span v-if="timer.minutes !== 0">
+            {{ timer.minutes }}:
+        </span>
+        {{ timer.seconds }}
     </div>
 </template>
 
-<script setup lang="ts">
-import { UseTimer } from 'vue-timer-hook';
+<script lang="ts">
+import { defineComponent } from "vue";
+import { useAnimeStore } from '../stores/anime';
+import { storeToRefs } from 'pinia';
 
-const { timer } = defineProps<{
-    timer: UseTimer
-}>();
+export default defineComponent({
+    setup() {
+        const store = useAnimeStore();
+
+        const { timer } = storeToRefs(store);
+
+        return {
+            timer,
+        }        
+    }
+});
 </script>
 
 <style scoped>

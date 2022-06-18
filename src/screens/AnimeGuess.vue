@@ -1,6 +1,6 @@
 <template>
-    <AnimeCard v-if="anime" :item="anime" />
-    <Loading v-model:active="isLoading" :is-full-page="true"/>
+    <AnimeCard v-if="store.anime" />
+    <Loading v-model:active="store.isLoading" :is-full-page="true"/>
 </template>
 
 <script setup lang="ts">
@@ -9,9 +9,11 @@ import 'vue-loading-overlay/dist/vue-loading.css';
 
 import AnimeCard from '../components/AnimeCard.vue';
 import { useAnime } from '../composables/useAnime';
+import { useAnimeStore } from '../stores/anime';
+import { useGuess } from '../composables/useGuess';
 
-const { anime, isLoading, getNextRandomAnime } = useAnime();
-
+const store = useAnimeStore();
+const { getNextRandomAnime } = useAnime();
 getNextRandomAnime();
 
 </script>

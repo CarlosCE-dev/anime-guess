@@ -1,42 +1,83 @@
 import { Anime } from '@/interfaces/anime'
 import { defineStore } from 'pinia'
 import { TextCharacter } from '../model/textCharacter';
+import { useTimer } from 'vue-timer-hook';
+import { ref, watch } from 'vue';
 
+const time = new Date();
+    time.setSeconds(time.getSeconds() + 60);
 
-interface mainStore {
-    anime?: Anime,
-    isLoading: boolean,
-    animeTitle?: TextCharacter[]
-}
+export const useAnimeStore = defineStore('main', () => {
+    const anime = ref<Anime>(),
+        isLoading = ref(false),
+        animeTitle = ref<TextCharacter[]>([]);
+    // @ts-ignore
+    const timer = ref(useTimer(time));
 
-const INITIAL_STATE: mainStore = {
-    anime: undefined,
-    isLoading: false,
-    animeTitle: undefined
-}
+    const setAnime = (item:Anime) => {
+        anime.value = item;
+        animeTitle.value = Array.from(item.title.trim()).map(m => new TextCharacter(m));
+    }
+    
+    const setLoader = (state:boolean) => {
+        isLoading.value = state;
+    }
 
-export const useAnimeStore = defineStore('main', {
-    state: () => INITIAL_STATE,
-    actions: {
-        setAnime(anime:Anime) {
-            this.anime = anime;
-            this.animeTitle = Array.from(anime.title.trim()).map(m => new TextCharacter(m));
-        },
-        setLoader(state:boolean) {
-            this.isLoading = state;
-        },
-        setHint() {
-            if (!this.animeTitle) return;
-            const items = [...this.animeTitle].filter(x => !x.isBlankSpace && x.hidden);
-            const index = Math.floor(Math.random() * items.length);
-            const item = items[index];
+    const setHint = () => {
+        if (animeTitle.value.length === 0) return;
+        const items = [...animeTitle.value].filter(x => !x.isBlankSpace && x.hidden),
+            index = Math.floor(Math.random() * items.length),
+            item = items[index];
 
-            for (let title of this.animeTitle) {
-                if (title.id === item.id) {
-                    title.hidden = false;
-                    break;
-                }
+        for (let title of animeTitle.value) {
+            if (title.id === item.id) {
+                title.hidden = false;
+                break;
             }
         }
-    },
-})
+    }
+    
+    const showAllLetters = () => {
+        for (let title of animeTitle.value) {
+            title.hidden = false;
+        }
+    }
+
+    watch(timer.value, (value) => {
+        if (timer.value.isExpired) {
+            showAllLetters();
+            return;
+        }
+        let number = value.seconds / 5;
+        if (Number.isInteger(number)) {
+            setHint();
+        }
+    });
+    
+    const resetGame = () => {
+        timer.value.restart();
+    }
+
+    const stopTimer = () => {
+        timer.value.pause();
+    }
+
+    const startTimer = () => {
+        timer.value.start();
+    }
+
+    return {
+        // State
+        anime,
+        timer,
+        animeTitle,
+        isLoading,
+        // Methods
+        setAnime,
+        setLoader,
+        setHint,
+        resetGame,
+        stopTimer,
+        startTimer
+    }
+});

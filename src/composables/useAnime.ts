@@ -1,32 +1,32 @@
 import { useAnimeStore } from "../stores/anime"
-import { storeToRefs } from "pinia";
 import { AnimeResponse } from "@/interfaces/anime";
 import axios from "axios";
 
 
 export const useAnime = () => {
-    const store = useAnimeStore(),
-        { anime, isLoading } = storeToRefs(store);
 
     const getNextRandomAnime = async () => {
         const store = useAnimeStore();
-        store.setLoader(true);
-        
+        const { setLoader, resetGame, setAnime, stopTimer, startTimer } = store;
+        stopTimer();
+        resetGame();
+
+        setLoader(true);
+
         try {
             
             const { data:body } = await axios.get<AnimeResponse>('https://api.jikan.moe/v4/random/anime');
-            store.setAnime(body.data);
+            setAnime(body.data);
             
         } catch (error) {
             console.error(error);
         } finally {
-            store.setLoader(false);
+            setLoader(false);
+            startTimer();
         }
     }
 
     return {
-        anime,
-        isLoading,
         /// Methods
         getNextRandomAnime
     }

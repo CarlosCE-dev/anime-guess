@@ -1,45 +1,55 @@
 <template>
-    <div class="card m-5" style="width: 500px;" v-if="item">
-        <img :src="item.images.jpg.large_image_url" class="card-img-top" alt="...">
+    <div class="card m-5" style="width: 500px;" v-if="anime">
+        <img :src="anime.images.jpg.large_image_url" class="card-img-top" alt="...">
         <div class="card-body">
             <h5 class="card-title anime__title">
-                <span v-for="(item, index) in animeTitle" :key="index">
-                {{ getText(item) }}</span>
+                <span v-for="(anime, index) in animeTitle" :key="index">
+                {{ getText(anime) }}</span>
             </h5>
             <div class="d-flex justify-content-end">
-                <Timer :timer="timer"/>
+                <Timer />
             </div>
         </div>
         <Footer />
     </div>
 </template>
 
-<script setup lang="ts">
-import { Anime } from '../interfaces/anime';
-import { useGuess } from '../composables/useGuess';
+<script lang="ts">
+import { defineComponent } from 'vue';
 
-// Components
-import Footer from './Footer.vue';
-import Timer from './Timer.vue';
+import { useAnimeStore } from '../stores/anime';
+import { storeToRefs } from 'pinia';
+
 import { TextCharacter } from '../model/textCharacter';
 
-const { item } = defineProps<{
-    item: Anime
-}>();
+import Footer from './Footer.vue';
+import Timer from './Timer.vue';
 
-const { animeTitle, timer } = useGuess();
-
-// in component
-const getText = (item:TextCharacter) => {
-    if (item.isBlankSpace) {
-        return " ";
-    } else if (item.hidden) {
-        return "_";
-    } else {
-        return item.text;
-    }
-}
-
+export default defineComponent({
+    setup() {
+        const store = useAnimeStore();
+        const { anime, timer, animeTitle } = storeToRefs(store);
+        const getText = (item: TextCharacter) => {
+            if (item.isBlankSpace) {
+                return " ";
+            }
+            else if (item.hidden) {
+                return "_";
+            }
+            else {
+                return item.text;
+            }
+        };
+        return {
+            anime,
+            animeTitle,
+            timer,
+            /// Methods
+            getText
+        };
+    },
+    components: { Footer, Timer }
+});
 </script>
 
 <style scoped>
